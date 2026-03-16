@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Zufallsbild-Spiel</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Level-Anzeigen oben links/rechts */
+        .level-indicator {
+			position: absolute;
+			top: 20px;
+			padding: 18px 26px;
+			border-radius: 12px;
+			font-weight: bold;
+			color: white;
+			font-size: 1.6rem;
+			box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+		}
+
+        #level1Indicator {
+            left: 15px;
+            background: #1e6ffb;
+            opacity: 0.9;
+        }
+
+        #level2Indicator {
+            right: 15px;
+            background: #0f3d8c;
+            opacity: 0.9;
+            display: none; /* Start in Level 1 */
+        }
+
+        /* Bildcontainer */
+        #imageContainer {
+			display: flex;
+			justify-content: center;
+			align-items: center; /* wichtig für vertikale Ausrichtung */
+			gap: 20px;
+			width: 100%;
+			margin-top: 60px;
+		}
+
+		.bild {
+			width: auto;
+			height: calc(100vh - 220px); /* feste Höhe, abhängig vom Fenster */
+			max-height: calc(100vh - 220px);
+			object-fit: contain;
+			transition: opacity 0.5s ease;
+			opacity: 1;
+		}
+
+		.bild.small {
+			width: 45%;   /* zwei Bilder nebeneinander */
+			height: calc(100vh - 220px);
+			max-height: calc(100vh - 220px);
+		}
+
+        /* Hauptbutton */
+        #weiterBtn {
+            padding: 12px 28px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background: #1e6ffb;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: background 0.25s ease, transform 0.15s ease;
+            margin-top: 20px;
+        }
+
+        #weiterBtn:hover {
+            background: #1557c9;
+            transform: translateY(-2px);
+        }
+
+        /* Level-Buttons */
+		.levelBtn {
+			padding: 10px 20px;
+			margin: 10px;
+			border-radius: 8px;
+			border: none;              /* keine Kontur */
+			background: #d9d9d9;       /* dezentes Grau */
+			cursor: pointer;
+			font-size: 1rem;
+			color: #333;
+			transition: background 0.2s ease, transform 0.15s ease;
+		}
+
+			.levelBtn:hover {
+				background: #c7c7c7;
+				transform: translateY(-2px);
+			}
+
+			.levelBtn:active {
+				transform: translateY(0);
+			}
+
+        #levelButtons {
+            display: flex;
+            gap: 20px;
+        }
+		
+		#ampersand {
+			position: absolute;
+			font-size: min(20vw, 20vh); /* passt sich automatisch an */
+			font-weight: bold;
+			color: rgba(10, 60, 110, 0.8);
+			pointer-events: none;
+			z-index: 10;
+			display: none;
+			animation: pulse 2s infinite ease-in-out;
+		}
+
+		/* Pulsieren */
+		@keyframes pulse {
+			0%   { transform: scale(1); }
+			50%  { transform: scale(1.08); }
+			100% { transform: scale(1); }
+		}
+		
+		.quellen {
+			color: gray;
+			font-size: 80%;
+		}
+
+    </style>
+</head>
+<body>
+
+    <!-- Level-Anzeigen -->
+    <div id="level1Indicator" class="level-indicator">1</div>
+    <div id="level2Indicator" class="level-indicator">2</div>
+	
+	<!-- &-Zeichen -->
+	<div id="ampersand">&</div>
+
+    <!-- Bildbereich -->
+    <div id="imageContainer">
+        <img id="bild1" class="bild" src="bild1.png" alt="Bild 1">
+    </div>
+
+    <!-- Weiter-Button -->
+    <button id="weiterBtn">Weiter</button>
+
+    <!-- Level-Auswahl -->
+    <div id="levelButtons">
+        <button class="levelBtn" id="btnLevel1">Level 1</button>
+        <button class="levelBtn" id="btnLevel2">Level 2</button>
+    </div>
+	<div>
+	<p class = "quellen" > Bildquellen: Alle Bilder von Freepik: pikisuperstark (starker Mann), gsstudioimage (hüpfende Frau), djvstock (positiver Mann) </p>
+	</div>
+
+    <script>
+        const bilder = ["bild1.png", "bild2.png", "bild3.png"];
+        let level = 1;
+
+        const container = document.getElementById("imageContainer");
+        const weiterBtn = document.getElementById("weiterBtn");
+
+        const level1Indicator = document.getElementById("level1Indicator");
+        const level2Indicator = document.getElementById("level2Indicator");
+		
+		const amp = document.getElementById("ampersand");
+
+        // Level wechseln
+        document.getElementById("btnLevel1").onclick = () => setLevel(1);
+        document.getElementById("btnLevel2").onclick = () => setLevel(2);
+
+        function setLevel(lvl) {
+            level = lvl;
+
+            // Level-Anzeigen umschalten
+            level1Indicator.style.display = lvl === 1 ? "block" : "none";
+            level2Indicator.style.display = lvl === 2 ? "block" : "none";
+			
+			// &-Zeichen ausblenden
+			amp.style.display = "none";
+
+            // Bildcontainer neu aufbauen
+            container.innerHTML = "";
+
+            if (lvl === 1) {
+                const img = document.createElement("img");
+                img.id = "bild1";
+                img.className = "bild";
+                img.src = bilder[0];
+                container.appendChild(img);
+            } else {
+                const imgA = document.createElement("img");
+                imgA.id = "bildA";
+                imgA.className = "bild small";
+                imgA.src = bilder[0];
+
+                const imgB = document.createElement("img");
+                imgB.id = "bildB";
+                imgB.className = "bild small";
+                imgB.src = bilder[1];
+
+                container.appendChild(imgA);
+                container.appendChild(imgB);
+            }
+        }
+
+        // Weiter-Button Logik
+        weiterBtn.addEventListener("click", () => {
+            if (level === 1) {
+                const img = document.getElementById("bild1");
+                fadeOut(img);
+
+                setTimeout(() => {
+                    let neuesBild;
+                    const aktuelles = img.src.split("/").pop();
+
+                    do {
+                        neuesBild = bilder[Math.floor(Math.random() * bilder.length)];
+                    } while (neuesBild === aktuelles);
+
+                    img.src = neuesBild;
+                    fadeIn(img);
+                }, 300);
+
+            } else {
+				const imgA = document.getElementById("bildA");
+				const imgB = document.getElementById("bildB");
+
+				fadeOut(imgA);
+				fadeOut(imgB);
+				amp.style.display = "none"; // & zunächst ausblenden
+
+				setTimeout(() => {
+					let b1, b2;
+
+					do {
+						b1 = bilder[Math.floor(Math.random() * bilder.length)];
+						b2 = bilder[Math.floor(Math.random() * bilder.length)];
+					} while (b1 === b2);
+
+					imgA.src = b1;
+					imgB.src = b2;
+
+					fadeIn(imgA);
+					fadeIn(imgB);
+
+					// 65% Chance für das &-Zeichen
+						if (Math.random() < 0.65) {
+							amp.style.display = "block";
+
+							   // Position zwischen den Bildern
+							const rectA = imgA.getBoundingClientRect();
+							const rectB = imgB.getBoundingClientRect();
+
+							const centerX = (rectA.right + rectB.left) / 2;
+							const centerY = (rectA.top + rectA.bottom) / 2;
+
+							// Größe des &-Zeichens dynamisch auslesen
+							const ampRect = amp.getBoundingClientRect();
+							const ampWidth = ampRect.width;
+							const ampHeight = ampRect.height;
+
+							amp.style.left = (centerX - ampWidth / 2) + "px";
+							amp.style.top  = (centerY - ampHeight / 2) + "px";
+						}
+
+
+				}, 300);
+			}
+        });
+
+        function fadeOut(el) {
+            el.style.opacity = 0;
+        }
+
+        function fadeIn(el) {
+            el.style.opacity = 1;
+        }
+    </script>
+
+</body>
+</html>
